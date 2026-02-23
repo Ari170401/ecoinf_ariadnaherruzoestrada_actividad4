@@ -1,0 +1,201 @@
+---
+title: "Práctica de Reproducibilidad"
+author: "Ariadna Herruzo Estrada"
+date: "2026-02-17"
+output: 
+  pdf_document:
+    keep_tex: true
+    latex_engine: xelatex
+bibliography: referencias.bib
+always_allow_html: true
+header-includes:
+  - \usepackage{float}
+  - \usepackage{xcolor}
+  - \usepackage{hyperref}
+  - \hypersetup{
+      colorlinks=true,
+      linkcolor=blue,
+      urlcolor=blue,
+      citecolor=blue
+    }
+---
+
+# MEDICIONES TOMADAS CON EL INTRUMENTO *IRGA (Infrared Gas Analyzer)*
+
+## Base de datos y variables a analizar:
+Voy a analizar una base de datos que he usado en la EEZ cuando estuve haciendo estudios de **Neodimio (Nd) sobre unas lechugas** para estudiar su bioacumulación. En la base de datos aparecen las medidas que tomé con el *instrumento IRGA (Infrared Gas Analyzer)* donde en la primera columna aparece el **número de muestra**, en la segunda columna aparece la variable **E (tasa de transpiración)**, en la tercera columna aparece **A (tasa de asimilación neta de CO2)**, en la cuarta columna aparece **Ci (concentración interna de CO2**) y en la quinta columna aparece **gsw (conductancia estomática al vapor de agua)**.
+
+```{r fig.irga, fig.cap="Sistema LI-6800 Portable Photosynthesis System", echo=FALSE, fig.align='center', out.width='60%'}
+knitr::include_graphics("fotografia_irga.jpeg")
+```
+
+
+\noindent Fuente: Guíalab – Notas técnicas sobre LI‑6800 Sistema Portátil de Fotosíntesis.\\
+\href{https://fluxnet.org/wp-content/uploads/ES_Lynch_LICOR_FluxCourse_2022_Intro.pdf}{\color{blue}{Enlace al manual IRGA}}
+
+Para obtener más información sobre *cómo se usa este instrumento o para saber exactamente cuántas cosas puede medir*, consulta este enlace: \href{https://fluxnet.org/wp-content/uploads/ES_Lynch_LICOR_FluxCourse_2022_Intro.pdf}{\color{blue}{Información sobre el instrumento IRGA}}
+
+*Si quieres conocer más acerca de la bioacumulacion de Nd en lechugas, puedes leer el siguiente artículo:*
+
+
+Rueda‑López, I., Trejo‑Téllez, L. I., Gómez‑Merino, F. C., Peralta‑Sánchez, M. G., & Ramírez‑Olvera, S. M. (2024). *Neodymium and zinc stimulate growth, biomass accumulation and nutrient uptake of lettuce plants in hydroponics.* **Folia Horticulturae, 36(2), 283–297.** \href{https://doi.org/10.2478/fhort-2024-0017}{\color{blue}{https://doi.org/10.2478/fhort-2024-0017}}
+
+ **Enlace al artículo en la web:**
+
+\href{https://doaj.org/article/cd5ab28371c04f8e90e026f14cb30347}{\color{blue}{Neodymium Exerts Biostimulant and Synergistic Effects on the Nutrition and Biofortification of Lettuce with Zinc}}
+
+Aunque la concentración de este compuesto pueda tener un efecto positivo combinado con otros elementos como el Zinc en lechugas cultivadas en hidroponía (@RuedaLopez2024), cuando las concentraciones de este son elevadas (como en zonas contaminadas) se puede observar una disminución de la tasa de fotosíntesis y marchitamiento prematuro de sus hojas. 
+
+**Trozo de código para crear las gráficas**
+
+La base de datos con la que voy a trabajar en este ejercicio contiene varias variables medidas con el instrumento IRGA pero yo solo me voy a quedar con la variable E (Tasa de transpiración) en las hojas de lechuga. He simplificado el experimento ya que la base de datos era muy grande y no creo que sea necesario tratar una gran cantidad de datos para estos ejercicios. El primer tratamiento que he tratado se basa en exponer a las lechugas a una concentración de 156 mg Nd/kg suelo, donde tenemos tres tipos de suelo, el control (CT) donde no hemos añadido micorrizas, el segundo suelo (AZ) sería lo mismo pero inoculando las raíces de las lechugas con una micorriza que se aisló de la zona donde ocurrió el desastre de Aznarcóllar (*Rhizoglomus sp*), ya que pensamos que esta estaría "más acostumbrada" a niveles relativamente altos de contaminantes. En el  último suelo (CM) hicimos lo mismo pero inoculamos el suelo con una cepa comercial que se usa ampliamente en este tipo de estudios (*Rhizophagus irregularis*)
+
+
+
+## Primero de todo tengo que cargar este paquete para poder añadir la base de datos y hacer las gráficas:
+
+```{r, message=FALSE, warning=FALSE}
+library(readxl)
+datos <- read_excel("medidas_irga_lechugas.xlsx")
+```
+
+Luego he dividido mis datos en dos bloques, el primero de ellos, el  bloque 1 coge las filas de datos 0-60 y el bloque 2 coge el rango de 61-120. Lo he hecho de esta manera para reducir datos ya que mi archivo contiene muchas más variables y muchas más filas pero creo que es mejor simplificar un poco para estos ejercicios, por eso me he quedado con dos rangos de filas y, por tanto, dos gráficas.
+
+# -----------------------------------------------------------------------
+# BLOQUE 1 (filas 0-60)
+# -----------------------------------------------------------------------
+
+```{r, message=FALSE, warning=FALSE}
+#Para calcular las medias de cada bloque y hacer las gráficas necesito instalar estos paquetes
+library(ggplot2)
+library(dplyr)
+```
+
+```{r, message=FALSE, warning=FALSE}
+#Aquí estoy haciendo las medias del primer bloque para luego representarlas gráficamente
+bloque1 <- datos[1:60, ]
+medias_subbloques1 <- data.frame(
+  Subbloque = c("CT156", "AZ156", "CM156"),
+  Media_E = c(
+    mean(bloque1$E[1:20]),
+    mean(bloque1$E[21:40]),
+    mean(bloque1$E[41:60])
+  )
+)
+
+medias_subbloques1$Subbloque <- factor(
+  medias_subbloques1$Subbloque,
+  levels = c("CT156", "AZ156", "CM156")
+)
+#Con esto estoy graficando los resultados de las medias
+ggplot(medias_subbloques1, aes(x = Subbloque, y = Media_E, fill = Subbloque)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Tasa de transpiración en concentración media de Nd",
+       x = "Tratamientos",
+       y = "Medida de E (mmol H$_2$O m$^{-2}$ s$^{-1}$)") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Blues") +
+  theme(legend.position = "none")
+```
+
+
+# -----------------------------------------------------------------------
+# BLOQUE 2 (filas 61-120)
+# -----------------------------------------------------------------------
+```{r, message=FALSE, warning=FALSE}
+#Ahora hacemos lo mismo que en el bloque 1
+bloque2 <- datos[61:120, ]
+
+medias_subbloques2 <- data.frame(
+  Subbloque = c("CT156", "AZ156", "CM156"),  
+  Media_E = c(
+    mean(bloque2$E[1:20]),   # filas 61-80 → CT156
+    mean(bloque2$E[21:40]),  # filas 81-100 → AZ156
+    mean(bloque2$E[41:60])   # filas 101-120 → CM156
+  )
+)
+
+medias_subbloques2$Subbloque <- factor(medias_subbloques2$Subbloque, 
+                                       levels = c("CT156", "AZ156", "CM156"))
+
+ggplot(medias_subbloques2, aes(x = Subbloque, y = Media_E, fill = Subbloque)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Tasa de transpiración en concentración media de Nd",
+       x = "Tratamientos",
+       y = "Medida de E (mmol H$_2$O m$^{-2}$ s$^{-1}$)") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Reds") +
+  theme(legend.position = "none")  
+```
+
+## Tabla de medias de E por bloque y tratamiento
+```{r, message=FALSE, warning=FALSE}
+library(knitr)
+library(dplyr)
+```
+# -----------------------------------------------------------------------
+# Bloque 1
+# -----------------------------------------------------------------------
+```{r, message=FALSE, warning=FALSE}
+bloque1 <- datos[1:60, ]
+
+tabla_bloque1 <- data.frame(
+  Bloque = "Bloque 1",
+  Tratamiento = c("CT156", "AZ156", "CM156"),
+  Media_E = c(
+    mean(bloque1$E[1:20]),
+    mean(bloque1$E[21:40]),
+    mean(bloque1$E[41:60])
+  )
+)
+```
+# -----------------------------------------------------------------------
+# Bloque 2
+# -----------------------------------------------------------------------
+```{r, message=FALSE, warning=FALSE}
+
+bloque2 <- datos[61:120, ]
+
+tabla_bloque2 <- data.frame(
+  Bloque = "Bloque 2",
+  Tratamiento = c("CT156", "AZ156", "CM156"),
+  Media_E = c(
+    mean(bloque2$E[1:20]),
+    mean(bloque2$E[21:40]),
+    mean(bloque2$E[41:60])
+  )
+)
+```
+# -----------------------------------------------------------------------
+## Tabla procesada a partir de un código:
+# -----------------------------------------------------------------------
+```{r, message=FALSE, warning=FALSE}
+tabla_final <- rbind(tabla_bloque1, tabla_bloque2)
+
+kable(tabla_final, digits = 4)
+
+```
+# -----------------------------------------------------------------------
+# Elemento interactivo: Gráfica interactiva:
+# -----------------------------------------------------------------------
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+
+p2 <- ggplot(tabla_final, 
+             aes(x = Tratamiento, y = Media_E, fill = Bloque)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "Comparación de la tasa de transpiración (E) entre bloques",
+       x = "Tratamiento",
+       y = "Media de E (mmol H$_2$O m$^{-2}$ s$^{-1}$)")
+
+print(p2)  # imprime la versión estática en el PDF
+
+```
+\noindent
+\href{grafica_interactiva.html}{\color{blue}{Haz clic aquí para ver la gráfica interactiva}}
+
+
+
+
+# Referencias
