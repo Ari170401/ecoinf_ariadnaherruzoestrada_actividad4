@@ -1,6 +1,6 @@
 ---
-title: "Actividad 4"
-author: "Ariadna"
+title: "Actividad 4. Entregable 2"
+author: "Ariadna Herruzo Estrada"
 date: "2026-02-23"
 output: pdf_document
 ---
@@ -8,6 +8,11 @@ output: pdf_document
 # No sé que poner aquí
 
 Hola hola, voy a usar las *mismas gráficas* que en la actividad anterior porque soy super **poco imaginativa** a veces. 
+
+## Nueva sección
+
+Sigo sin saber que poner aquí solo quiero modificar el texto, ¿Por qué los programadores odian la naturaleza?
+Porque tiene demasiados bugs y ninguno está documentado, tum tum tssss. Por cierto le he cambiado el color a las gráficas (invertido) para modificar el código, por si no se notaba.
 
 ```{r fig.irga, fig.cap="Sistema LI-6800 Portable Photosynthesis System", echo=FALSE, fig.align='center', out.width='60%'}
 knitr::include_graphics("fotografia_irga.jpeg")
@@ -47,7 +52,7 @@ ggplot(medias_subbloques1, aes(x = Subbloque, y = Media_E, fill = Subbloque)) +
        x = "Tratamientos",
        y = "Medida de E (mmol H$_2$O m$^{-2}$ s$^{-1}$)") +
   theme_minimal() +
-  scale_fill_brewer(palette = "Blues") +
+  scale_fill_brewer(palette = "Reds") +
   theme(legend.position = "none")
 ```
 
@@ -77,7 +82,7 @@ ggplot(medias_subbloques2, aes(x = Subbloque, y = Media_E, fill = Subbloque)) +
        x = "Tratamientos",
        y = "Medida de E (mmol H$_2$O m$^{-2}$ s$^{-1}$)") +
   theme_minimal() +
-  scale_fill_brewer(palette = "Reds") +
+  scale_fill_brewer(palette = "Blues") +
   theme(legend.position = "none")  
 ```
 
